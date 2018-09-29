@@ -33,35 +33,35 @@ function init() {
 
 	let axes = new THREE.AxisHelper (10);
 	scene.add (axes);
-  
+
 	train = new THREE.Group();
-  let geometry = new THREE.BoxGeometry (40, 10, 20)
-  let material = new THREE.MeshNormalMaterial()
-  mesh = new THREE.Mesh (geometry, material)
-  //scene.add (mesh)
+	let geometry = new THREE.BoxGeometry (30, 10, 20)
+	let material = new THREE.MeshNormalMaterial()
+	mesh = new THREE.Mesh (geometry, material)
+	//scene.add (mesh)
 
 	let block = new THREE.Mesh (new THREE.CylinderGeometry(5,5,20,20,5), new THREE.MeshNormalMaterial());
-  block.position.y = 10;
-  block.position.x = 15
-  train.add (block);
-  train.add (mesh);
-  
-  scene.add (train);
-  
+	block.position.y = 10;
+	block.position.x = 10;
+	train.add (block);
+	train.add (mesh);
+
+	scene.add (train);
+
 	angle = 0;
 }
 
 function animate() {
-  controls.update();
-  renderer.render (scene, camera);
+	controls.update();
+	renderer.render (scene, camera);
 
 	angle = angle + 0.01;  // radian
 	train.rotation.y = angle + Math.PI/2;
-  //console.log (angle)
-  
-  train.position.set (40*Math.cos(angle), 5, -40*Math.sin(angle));
-  
-  requestAnimationFrame (animate);
+	//console.log (angle)
+
+	train.position.set (40*Math.cos(angle), 5, -40*Math.sin(angle));
+
+	requestAnimationFrame (animate);
 }
 
 </script>
