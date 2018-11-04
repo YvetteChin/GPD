@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	#info {
+		position: absolute;
+		top: 0px; width: 100%;
+		font-family: Monospace;
+		font-size: 20px;
+		padding: 5px;
+		text-align: center;
+		color: #003333
+	}
+	a {color: yellow}
+</style>
+</head>
+
+<body>
+
+  <div id = "info"> 
+	 <br>Game physics and sound<br><br>
+	 with BGM (<a href="javascript:toggle();">dimmer</a>)<br>
+	<button id="play" style="width:20%">Play</button> 
+  </div>
+  
+<audio id="collisionsound" style="display:none">
+<source src="http://s3.amazonaws.com/hifi-public/sounds/dice/diceCollide.wav" type='audio/wav'>
+</audio>
+
+<audio id="soundtrack" autoplay loop style="display:none">
+<source src="https://www.bensound.org/bensound-music/bensound-creativeminds.mp3" type='audio/mp3'>
+</audio>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.min.js"></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+<script>
+
+$('#play').click ( function() {
+	isPaused = !isPaused;
+	if (isPaused) { 
+		$('#play').text ('Play')
+		soundTrack.pause()
+	} else {
+		$('#play').text ('Pause')
+		soundTrack.play()
+	}
+});
+
+class Particle {
+	constructor (mesh,color,rad) {
+		this.pos = new THREE.Vector3()
+		this.vel = new THREE.Vector3()
+		this.force = new THREE.Vector3(0,0,0)
+		this.mesh = mesh;
+		this.rad = rad;
+		this.mesh.material.color.copy(color.clone());
+		this.light = new THREE.PointLight (color, 1,50)
+		scene.add (this.light)
+		scene.add (mesh)   // add to scene when particle is created
+	}
+	update (dt) {
+		this.vel.add (this.force.clone().multiplyScalar (dt))
+		this.pos.add (this.vel.clone().multiplyScalar(dt))
+		
+		// simple plane collision at y = -25
+		if (this.pos.z > 100 - this.rad) {
+			this.pos.z = 100 - this.rad;
+			this.vel.z = - 0.9*this.vel.z;
+			collisionSound.play();
+		}
+		if (this.pos.z < -100 + this.rad) {
+			this.pos.z = -100 + this.rad;
+			this.vel.z = - 0.9*this.vel.z;
+			collisionSound.play();
+		}
+		
+		if (this.pos.x > 100 - this.rad) {
+			this.pos.x = 100 - this.rad;
+			this.vel.x = - 0.9 * this.vel.x;
+			collisionSound.play();
+		}
+		if (this.pos.x < -100 + this.rad) {
+			this.pos.x = -100 + this.rad
+			this.vel.x = - 0.9 * this.vel.x;
+			collisionSound.play();
+		}
+	
+		this.mesh.position.copy (this.pos)
+		this.light.position.copy (this.pos)
+		this.light.position.y += 15
+	}
+
+}
+
+
+var scene, renderer, camera;
+var clock = new THREE.Clock();
+
+var collisionSound, soundTrack;
+var isDimming = false, soundVal = 1.0, sign = 1.0;
+var isPaused = false;
+var pucks = [];
+var ball_number = 20;
+init();
+animate();
+
+function toggle() {
+	isDimming = !isDimming;
+	sign = isDimming ? -1 : 1;
+	// console.log (isDimming);
+}
+
+function init() {
+
+	collisionSound = document.getElementById ('collisionsound');
+	soundTrack = document.getElementById ('soundtrack');
+	
+	scene = new THREE.Scene();
+	
+	camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
+	camera.position.z = 500;
+	scene.add(camera);
+	
+	let light = new THREE.PointLight(0xffffff);
+	light.position.set(100, 300, 200);
+	//scene.add(light);
+	
+	let gridXZ = new THREE.GridHelper(200, 20, 'red', 'white');
+	//scene.add(gridXZ);
+	
+	renderer = new THREE.WebGLRenderer( {antialias:true} );
+	renderer.setSize (window.innerWidth, window.innerHeight);
+	renderer.setClearColor (0xeeeeee);
+	
+	let controls = new THREE.OrbitControls(camera, renderer.domElement);
+	
+	document.body.appendChild (renderer.domElement);
+	
+	//debugger;
+	
+	
+	for(let i = 0; i < ball_number; i++){
+		let color = new THREE.Color();
+		color.setHSL(Math.floor(Math.random() * 16777215) / 16777215, 1, 0.5);
+		let rad = Math.floor(Math.random() * 5) + 5;
+		let puckMesh = new THREE.Mesh (new THREE.CylinderGeometry (rad,rad,6,32), new THREE.MeshLambertMaterial({color:color,emissive:color}))
+		let puck = new Particle (puckMesh,color,rad)
+		
+		puck.vel.set (Math.floor(Math.random() * 200) - 100,0,Math.floor(Math.random() * 200) - 100)
+		
+		puck.pos.set (Math.floor(Math.random() * 180) -90,3,Math.floor(Math.random() * 180) -90)
+		pucks.push(puck)
+	}
+	
+	/*puckMesh = new THREE.Mesh (new THREE.CylinderGeometry (10,10,6,32), new THREE.MeshLambertMaterial({color:0x123456,emissive:0x123456}))
+	puck = new Particle (puckMesh,0x123456)
+	puck.vel.set (30,0,-10)
+	puck.pos.set (0,3,50)
+	
+	pucks.push(puck)*/
+	
+	
+	var cubeGeometry = new THREE.BoxGeometry (200,6,200);
+	var cubeMaterial = new THREE.MeshPhongMaterial({color:0x888888});
+	cube = new THREE.Mesh (cubeGeometry, cubeMaterial);
+	cube.position.set (0,-3,0);
+	scene.add (cube);
+	
+	var cubeGeometry = new THREE.BoxGeometry (5,20,205);
+	var wallMaterial = new THREE.MeshLambertMaterial ({transparent:true});
+	var side1 = new THREE.Mesh (cubeGeometry, wallMaterial);
+	side1.position.set (-100,5,0);
+	scene.add (side1);
+	var side2 = side1.clone();
+	side2.position.set (100, 5,0);
+	scene.add (side2);
+	
+	var cubeGeometry = new THREE.BoxGeometry (195,20,5);
+	var side3 = new THREE.Mesh (cubeGeometry, wallMaterial);
+	side3.position.set (0,5,-100);
+	scene.add (side3);
+	var side4 = side3.clone();
+	side4.position.set (0,5,100);
+	scene.add (side4);
+	
+	window.addEventListener ('resize', onWindowResize, false);
+}
+
+function onWindowResize () {
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+	renderer.setSize (window.innerWidth, window.innerHeight);
+}
+
+function detate(i,j) {
+	let X = new THREE.Vector3();
+	let Y = new THREE.Vector3();
+	let center = new THREE.Vector3();
+	let distance = 0;
+	let diffrence = new THREE.Vector3();
+	
+	X.copy(pucks[i].pos);
+	Y.copy(pucks[j].pos);
+	
+	distance = Math.sqrt((X.x - Y.x) * (X.x - Y.x) + (X.z - Y.z) * (X.z - Y.z));
+	diffrence.copy(X.clone().sub(Y.clone()));
+	
+	if(distance < pucks[i].rad + pucks[j].rad){
+		collisionSound.play();
+		center.set((X.x + Y.x)/2,3,(X.z + Y.z)/2);
+		//console.log(center);
+		pucks[i].pos.copy(center.clone().add(diffrence.clone().normalize().multiplyScalar(pucks[i].rad)))
+		pucks[j].pos.copy(center.clone().add(diffrence.clone().normalize().multiplyScalar(pucks[j].rad * -1 )))
+		
+		let project = pucks[i].vel.clone().projectOnVector(diffrence.clone());
+		let a = pucks[i].vel.clone().sub(project.clone());
+		pucks[i].vel.copy(a.sub(project.clone()));
+		
+		let project2 = pucks[j].vel.clone().projectOnVector(diffrence.clone());
+		let a2 = pucks[j].vel.clone().sub(project2.clone());
+		pucks[j].vel.copy(a2.sub(project2.clone()));
+	}
+}
+
+function animate() {
+	soundVal += sign*0.01;
+	soundVal = THREE.Math.clamp (soundVal, 0, 1);
+	soundtrack.volume = soundVal;
+
+	pucks.forEach(function(puck){
+		puck.update (0.1);
+	})
+	
+	for(let i = 0; i < pucks.length;i++){
+		for(let j = i + 1;j < pucks.length;j++){
+			detate(i,j)
+		}
+	}
+	
+	requestAnimationFrame ( animate );  
+	renderer.render (scene, camera);
+}
+
+</script>
+</body>
+
+</html>
