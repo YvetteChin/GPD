@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	#info {
+    position: absolute;
+    top: 0px;
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+    color: #ffff00
+	}
+
+	#gui {
+		position: absolute;
+		top: 10px;
+		left: 10px;
+	}
+
+	body {
+		overflow: hidden;
+	}
+
+</style>
+</head>
+
+<body>
+
+	<div id="info">hw3<br/>
+		Keyframe Animation
+		<br/><button id="reStart" style="width: 58px">reStart</button>
+		<button id="camera" style="width: 58px">camera</button>
+	</div>
+	<audio id="soundtrack" autoplay loop style="display:none">
+		<source src="https://www.bensound.org/bensound-music/bensound-creativeminds.mp3" type='audio/mp3'>
+	</audio>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.min.js"></script>
+	<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5.1/dat.gui.min.js"></script>
+	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+<script>
+var camera, scene, renderer, controls;
+var steve, soundTrack;
+var gcontrols, t = 0, mode = true;
+
+var action = [
+	{
+		time: 0,
+        head_x: 0.01,
+        head_y: 0.01,
+        head_z: 0.01,
+        Larm_x: 0.01,
+        Larm_y: 0.01,
+        Larm_z: 0.01,
+        Rarm_x: 0.01,
+        Rarm_y: 0.01,
+        Rarm_z: 0.01,
+        Lleg_x: 0.01,
+        Lleg_y: 0.01,
+        Lleg_z: 0.01,
+        Rleg_x: 0.01,
+        Rleg_y: 0.01,
+        Rleg_z: 0.01,
+        Body_x: 0.01,
+        Body_y: 0.01,
+        Body_z: 0.01,
+        pos_x: 0.01,
+        pos_y: 0.01,
+        pos_z: 0.01
+	},
+	{
+		time: 0.2,
+        head_x: -0.05034672304439747,
+        head_y: -0.6424143763213531,
+        head_z: -0.001,
+        Larm_x: -1.611122621564482,
+        Larm_y: 0.01,
+        Larm_z: 0.01,
+        Rarm_x: -1.611,
+        Rarm_y: 0.02866596194503157,
+        Rarm_z: -1.5012198731501059,
+        Lleg_x: 0.01,
+        Lleg_y: 0.01,
+        Lleg_z: 0.01,
+        Rleg_x: 0.01,
+        Rleg_y: 0.01,
+        Rleg_z: 0.01,
+        Body_x: 0.01,
+        Body_y: 0.01,
+        Body_z: 0.01,
+        pos_x: 0.01,
+        pos_y: 0.01,
+        pos_z: 0.01
+	},
+	{
+		time: 0.4,
+        head_x: 0.01,
+        head_y: 0.01,
+        head_z: 0.01,
+        Larm_x: 0.01,
+        Larm_y: 0.01,
+        Larm_z: 0.01,
+        Rarm_x: 0.01,
+        Rarm_y: 0.01,
+        Rarm_z: 0.01,
+        Lleg_x: 0.01,
+        Lleg_y: 0.01,
+        Lleg_z: 0.01,
+        Rleg_x: 0.01,
+        Rleg_y: 0.01,
+        Rleg_z: 0.01,
+        Body_x: 0.01,
+        Body_y: 0.01,
+        Body_z: 0.01,
+        pos_x: 0.01,
+        pos_y: 0.01,
+        pos_z: 0.01
+	},
+	{
+		time: 0.6,
+		head_x: 0.01,
+        head_y: 0.806,
+        head_z: 0.01,
+        Larm_x: -1.5728308668076112,
+        Larm_y: -0.01501550387596895,
+        Larm_z: 1.5503234672304442,
+        Rarm_x: -1.611122621564482,
+        Rarm_y: 0.01,
+        Rarm_z: 0.01,
+        Lleg_x: 0.01,
+        Lleg_y: 0.01,
+        Lleg_z: 0.01,
+        Rleg_x: 0.01,
+        Rleg_y: 0.01,
+        Rleg_z: 0.01,
+        Body_x: 0.01,
+        Body_y: 0.01,
+        Body_z: 0.01,
+        pos_x: 0.01,
+        pos_y: 0.01,
+        pos_z: 0.01
+	},
+	{
+		time: 0.8,
+        head_x: 0.01,
+        head_y: 0.01,
+        head_z: 0.01,
+        Larm_x: 0.01,
+        Larm_y: 0.01,
+        Larm_z: 0.01,
+        Rarm_x: 0.01,
+        Rarm_y: 0.01,
+        Rarm_z: 0.01,
+        Lleg_x: 0.01,
+        Lleg_y: 0.01,
+        Lleg_z: 0.01,
+        Rleg_x: 0.01,
+        Rleg_y: 0.01,
+        Rleg_z: 0.01,
+        Body_x: 0.01,
+        Body_y: 0.01,
+        Body_z: 0.01,
+        pos_x: 0.01,
+        pos_y: 0.01,
+        pos_z: 0.01
+	},
+	{
+		time: 1,
+		head_x: 0.01,
+        head_y: 0.01,
+        head_z: 0.01,
+        Larm_x: 0.01,
+        Larm_y: 0.01,
+        Larm_z: 1.5503234672304442,
+        Rarm_x: 0.01,
+        Rarm_y: 0.01,
+        Rarm_z: -1.576044397463002,
+        Lleg_x: 0.01,
+        Lleg_y: 0.01,
+        Lleg_z: 0.5516124031007752,
+        Rleg_x: 0.01,
+        Rleg_y: 0.01,
+        Rleg_z: -0.4976899224806203,
+        Body_x: 0.01,
+        Body_y: 0.01,
+        Body_z: 0.01,
+        pos_x: 0.01,
+        pos_y: 27.801268498942918,
+        pos_z: 0.01
+	},
+	{
+		time: 1.2,
+        head_x: 0.01,
+        head_y: 0.01,
+        head_z: 0.01,
+        Larm_x: 0.01,
+        Larm_y: 0.01,
+        Larm_z: 0.01,
+        Rarm_x: 0.01,
+        Rarm_y: 0.01,
+        Rarm_z: 0.01,
+        Lleg_x: 0.01,
+        Lleg_y: 0.01,
+        Lleg_z: 0.01,
+        Rleg_x: 0.01,
+        Rleg_y: 0.01,
+        Rleg_z: 0.01,
+        Body_x: 0.01,
+        Body_y: 0.01,
+        Body_z: 0.01,
+        pos_x: 0.01,
+        pos_y: 0.01,
+        pos_z: 0.01
+	}];
+$("#reStart").click(function() {
+    soundTrack.currentTime = 0;
+    t = 0;
+});
+$("#camera").click(function() {
+    mode = !mode;
+});
+
+class Doraemon {
+    constructor() {
+        this.obj = new THREE.Object3D();
+        this.head = new THREE.Object3D();
+        this.body = new THREE.Object3D();
+        this.rarm = new THREE.Object3D();
+        this.larm = new THREE.Object3D();
+        this.rleg = new THREE.Object3D();
+        this.lleg = new THREE.Object3D();
+        this.build_Doraemon();
+        scene.add(this.obj);
+    }
+
+    build_Doraemon() {
+        THREE.ImageUtils.crossOrigin = '';
+
+        let mesh = new THREE.Mesh(new THREE.BoxGeometry(46, 34, 46), new THREE.MultiMaterial([new THREE.MeshLambertMaterial({ // +x
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/2p4f14I.jpg')
+            }),
+            new THREE.MeshLambertMaterial({ // -x
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/2p4f14I.jpg')
+            }),
+            new THREE.MeshLambertMaterial({ // +y
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/TzPNIGB.jpg')
+            }),
+            new THREE.MeshLambertMaterial({ // -Y
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/TzPNIGB.jpg')
+            }),
+            new THREE.MeshLambertMaterial({ // +z
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/UEz0p48.jpg')
+            }),
+            new THREE.MeshLambertMaterial({ // -Z
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/2p4f14I.jpg')
+            })
+        ]));
+        this.head.add(mesh);
+
+        mesh = new THREE.Mesh(new THREE.BoxGeometry(35, 40, 35), new THREE.MultiMaterial([new THREE.MeshLambertMaterial({ // +x
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/WU5uA5j.jpg')
+            }),
+            new THREE.MeshLambertMaterial({ // -x
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/WU5uA5j.jpg')
+            }),
+            new THREE.MeshLambertMaterial({ // +y
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/8FiGy8Q.jpg')
+            }),
+            new THREE.MeshLambertMaterial({ // -Y
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/8FiGy8Q.jpg')
+            }),
+            new THREE.MeshLambertMaterial({ // +z
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/JOzPCr0.jpg')
+            }),
+            new THREE.MeshLambertMaterial({ // -Z
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/6dUzxZl.jpg')
+            })
+        ]));
+        mesh.position.y = 25;
+        this.body.add(mesh);
+        this.head.position.y = 63;
+        this.body.add(this.head);
+
+
+        mesh = new THREE.Mesh(new THREE.BoxGeometry(15, 30, 15), new THREE.MultiMaterial([new THREE.MeshLambertMaterial({ // +x
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/xAKDL4U.jpg')
+            }),
+            new THREE.MeshLambertMaterial({ // -x
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/xAKDL4U.jpg')
+            }),
+            new THREE.MeshLambertMaterial({ // +y
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/TzPNIGB.jpg')//上
+            }),
+            new THREE.MeshLambertMaterial({ // -Y
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/9Nok8uu.jpg')
+            }),
+            new THREE.MeshLambertMaterial({ // +z
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/xAKDL4U.jpg')
+            }),
+            new THREE.MeshLambertMaterial({ // -Z
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/xAKDL4U.jpg')
+            })
+        ]));
+        mesh.position.y = -10;
+
+        this.rarm.add(mesh.clone());
+        this.larm.add(mesh.clone());
+        this.body.add(this.rarm);
+        this.body.add(this.larm);
+        this.rarm.position.set(-25, 35, 0);
+        this.larm.position.set(25, 35, 0);
+        mesh = new THREE.Mesh(new THREE.BoxGeometry(14, 20, 14), new THREE.MultiMaterial([new THREE.MeshLambertMaterial({ // +x
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/2p4f14I.jpg')
+            }),
+            new THREE.MeshLambertMaterial({ // -x
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/2p4f14I.jpg')
+            }),
+            new THREE.MeshLambertMaterial({ // +y
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/TzPNIGB.jpg')
+            }),
+            new THREE.MeshLambertMaterial({ // -Y
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/TzPNIGB.jpg')
+            }),
+            new THREE.MeshLambertMaterial({ // +z
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/TcDyv2w.jpg')
+            }),
+            new THREE.MeshLambertMaterial({ // -Z
+                transparent: true,
+                map: THREE.ImageUtils.loadTexture('https://i.imgur.com/2p4f14I.jpg')
+            })
+        ]));
+        mesh.position.y = -10;
+
+        this.rleg.add(mesh.clone());
+        this.lleg.add(mesh.clone());
+        this.rleg.position.x = -7.5;
+        this.lleg.position.x = 7.5;
+
+
+        this.body.position.y = 15;
+        this.rleg.position.y = 20;
+        this.lleg.position.y = 20;
+        this.obj.add(this.body);
+        this.obj.add(this.rleg);
+        this.obj.add(this.lleg);
+    }
+
+    update() {
+        this.head.rotation.set(gcontrols.head_x, gcontrols.head_y, gcontrols.head_z);
+        this.larm.rotation.set(gcontrols.Larm_x, gcontrols.Larm_y, gcontrols.Larm_z);
+        this.rarm.rotation.set(gcontrols.Rarm_x, gcontrols.Rarm_y, gcontrols.Rarm_z);
+        this.lleg.rotation.set(gcontrols.Lleg_x, gcontrols.Lleg_y, gcontrols.Lleg_z);
+        this.rleg.rotation.set(gcontrols.Rleg_x, gcontrols.Rleg_y, gcontrols.Rleg_z);
+        this.body.rotation.set(gcontrols.Body_x, gcontrols.Body_y, gcontrols.Body_z);
+        this.obj.position.set(gcontrols.pos_x, gcontrols.pos_y, gcontrols.pos_z);
+    }
+
+    update2(t) {
+        if (t > 0) {
+            for (var i = 0; action[i].time <= t; i++);
+            let s = (t - action[i - 1].time) / (action[i].time - action[i - 1].time);
+            let ss = 1 - s;
+            this.head.rotation.set(action[i - 1].head_x * ss + action[i].head_x * s, action[i - 1].head_y * ss + action[i].head_y * s, action[i - 1].head_z * ss + action[i].head_z * s);
+            this.larm.rotation.set(action[i - 1].Larm_x * ss + action[i].Larm_x * s, action[i - 1].Larm_y * ss + action[i].Larm_y * s, action[i - 1].Larm_z * ss + action[i].Larm_z * s);
+            this.rarm.rotation.set(action[i - 1].Rarm_x * ss + action[i].Rarm_x * s, action[i - 1].Rarm_y * ss + action[i].Rarm_y * s, action[i - 1].Rarm_z * ss + action[i].Rarm_z * s);
+            this.lleg.rotation.set(action[i - 1].Lleg_x * ss + action[i].Lleg_x * s, action[i - 1].Lleg_y * ss + action[i].Lleg_y * s, action[i - 1].Lleg_z * ss + action[i].Lleg_z * s);
+            this.rleg.rotation.set(action[i - 1].Rleg_x * ss + action[i].Rleg_x * s, action[i - 1].Rleg_y * ss + action[i].Rleg_y * s, action[i - 1].Rleg_z * ss + action[i].Rleg_z * s);
+            this.body.rotation.set(action[i - 1].Body_x * ss + action[i].Body_x * s, action[i - 1].Body_y * ss + action[i].Body_y * s, action[i - 1].Body_z * ss + action[i].Body_z * s);
+            this.obj.position.set(action[i - 1].pos_x * ss + action[i].pos_x * s, action[i - 1].pos_y * ss + action[i].pos_y * s, action[i - 1].pos_z * ss + action[i].pos_z * s);
+        }
+    }
+}
+
+init();
+animate();
+
+function init() {
+    scene = new THREE.Scene();
+
+    camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
+    camera.position.y = 150;
+	camera.position.z = 200;
+    scene.add(camera);
+
+    var gridXZ = new THREE.GridHelper(400, 20, 'red', 'white');
+    scene.add(gridXZ);
+
+    renderer = new THREE.WebGLRenderer({
+        antialias: true
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x888888);
+
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+    document.body.appendChild(renderer.domElement);
+    window.addEventListener('resize', onWindowResize, false);
+    ////////////////////////////////////////////////////////////////////////
+    var lightmesh = new THREE.AmbientLight(0xffffff);
+    scene.add(lightmesh);
+    
+    THREE.ImageUtils.crossOrigin = '';
+    THREE.ImageUtils.crossOrigin = '';
+    
+    soundTrack = document.getElementById ('soundtrack');
+
+    GuiReset();
+    Doraemon = new Doraemon();
+}
+
+function animate() {
+    controls.update();
+
+    if (gcontrols.turn) Doraemon.update();
+    else {
+        t = (t + 0.02) % 1.2;
+        if (t == 0) t = 0.02;
+        Doraemon.update2(t);
+    }
+    
+    if(mode){
+    	camera.position.copy(Doraemon.obj.localToWorld(new THREE.Vector3(0, 300, 300)));
+        camera.lookAt(Doraemon.obj.localToWorld(new THREE.Vector3(0, 200, 200)));
+    }
+
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+}
+
+function GuiReset() {
+    gcontrols = {
+        turn: false,
+        head_x: 0.01,
+        head_y: 0.01,
+        head_z: 0.01,
+        Larm_x: 0.01,
+        Larm_y: 0.01,
+        Larm_z: 0.01,
+        Rarm_x: 0.01,
+        Rarm_y: 0.01,
+        Rarm_z: 0.01,
+        Lleg_x: 0.01,
+        Lleg_y: 0.01,
+        Lleg_z: 0.01,
+        Rleg_x: 0.01,
+        Rleg_y: 0.01,
+        Rleg_z: 0.01,
+        Body_x: 0.01,
+        Body_y: 0.01,
+        Body_z: 0.01,
+        pos_x: 0.01,
+        pos_y: 0.01,
+        pos_z: 0.01
+    };
+    var gui = new dat.GUI();
+    gui.domElement.id = 'gui';
+    gui.remember(gcontrols);
+    gui.add(gcontrols, 'turn');
+
+    let head = gui.addFolder("head");
+    head.add(gcontrols, 'head_x', -0.438, 0.326);
+    head.add(gcontrols, 'head_y', -0.806, 0.806);
+    head.add(gcontrols, 'head_z', -0.735, 0.735);
+
+    let Larm = gui.addFolder("Larm");
+    Larm.add(gcontrols, 'Larm_x', -2.645, 0.751);
+    Larm.add(gcontrols, 'Larm_y', -1.937, 1.937);
+    Larm.add(gcontrols, 'Larm_z', -0.657, 2.661);
+
+    let Rarm = gui.addFolder("Rarm");
+    Rarm.add(gcontrols, 'Rarm_x', -2.645, 0.751);
+    Rarm.add(gcontrols, 'Rarm_y', -1.937, 1.937);
+    Rarm.add(gcontrols, 'Rarm_z', -2.661, 0.657);
+
+    let Lleg = gui.addFolder("Lleg");
+    Lleg.add(gcontrols, 'Lleg_x', -1.867, 1.246);	
+    Lleg.add(gcontrols, 'Lleg_y', -1.317, 1.317);
+    Lleg.add(gcontrols, 'Lleg_z', -1.034, 1.034);
+
+    let Rleg = gui.addFolder("Rleg");
+    Rleg.add(gcontrols, 'Rleg_x', -1.867, 1.246);
+    Rleg.add(gcontrols, 'Rleg_y', -1.317, 1.317);
+    Rleg.add(gcontrols, 'Rleg_z', -1.034, 1.034);
+
+    let Body = gui.addFolder("Body");
+    Body.add(gcontrols, 'Body_x', -0.735, 1.741);
+    Body.add(gcontrols, 'Body_y', -1.034, 1.034);
+    Body.add(gcontrols, 'Body_z', -0.68, 0.68);
+
+    let pos = gui.addFolder("pos");
+    pos.add(gcontrols, 'pos_x', -50, 50);
+    pos.add(gcontrols, 'pos_y', -50, 50);
+    pos.add(gcontrols, 'pos_z', -50, 50);
+}
+
+function onWindowResize() {
+    let width = window.innerWidth,
+        height = window.innerHeight;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height);
+}
+
+
+</script>
+</body>
+
+</html>
